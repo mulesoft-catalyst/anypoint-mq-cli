@@ -147,12 +147,15 @@ def findExchange(username, password, region, orgId, envId, name):
 @click.option('--organization-id', 'orgId', help='Anypoint organization id (business group id)', envvar='MQ_ORG_ID')
 @click.option('--environment-id', 'envId', help='Anypoint environment id', envvar='MQ_ENV_ID')
 @click.option('--name', 'name', help='Queue name', required=True)
-@click.option('--fifo', 'fifo', help='Specifies if it is a FIFO queue', required=False, default=False)
+@click.option('--fifo', 'fifo', help='Specifies if it is a FIFO queue', required=False, default=False, type=bool)
 #@click.option('--exchange', 'exchange', help='Specifies if it is an Exchange queue', required=False, default=False)
 @click.option('--ttl', 'ttl', help='Specifies TTL configuration in ms', required=False, default=120000)
 @click.option('--lock-ttl', 'lockTtl', help='Specifies Lock TTL configuration in ms', required=False, default=10000)
 @click.option('--encrypted', 'encrypted', help='Specifies if queue is encrypted', required=False, default=False)
-def createQueue(username, password, region, orgId, envId, name, fifo, ttl, lockTtl, encrypted):
+@click.option('--dead-letter-queue', 'deadLetterQueue', help='Specifies the name of the DLQ', required=False)
+@click.option('--max-attempts', 'maxAttempts', help='Specifies the max deliveries attempts before DLQ redirection', required=False)
+@click.option('--delivery-delay', 'deliveryDelay', help='Specifies the delivery delay time in ms', required=False)
+def createQueue(username, password, region, orgId, envId, name, fifo, ttl, lockTtl, encrypted, deadLetterQueue, maxAttempts, deliveryDelay):
     """This command creates a queue (standard or FIFO) in the given region, org id and environment id """
 
     #### Anypoint login ####
@@ -169,8 +172,12 @@ def createQueue(username, password, region, orgId, envId, name, fifo, ttl, lockT
       "defaultTtl" : ttl,
       "defaultLockTtl" : lockTtl,
       "encrypted" : encrypted,
-      "fifo" : fifo
+      "fifo" : fifo,
+      "deadLetterQueueId": deadLetterQueue,
+      "maxDeliveries": maxAttempts,
+      "defaultDeliveryDelay": deliveryDelay
     }
+
 
     try:
         response = requests.request(
