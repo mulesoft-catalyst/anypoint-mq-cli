@@ -26,8 +26,10 @@
 	- mq search --username={myUsername} --password={myPassword} --region={region} --organization-id={bgId} --environment-id={envId}
 	- mq find-queues --username={myUsername} --password={myPassword} --region={region} --organization-id={bgId} --environment-id={envId} --name={queueName}
 	- mq find-exchanges --username={myUsername} --password={myPassword} --region={region} --organization-id={bgId} --environment-id={envId} --name={exchangeName}
-	- mq create-queue --username={myUsername} --password={myPassword} --region={region} --organization-id={bgId} --environment-id={envId} name={myQueueName} --fifo={fifo} (optional) --lock-ttl={lockTtl} (optional) --ttl={ttl} (optional) --encrypted={encrypted} (optional) --dead-letter-queue={dlqQueueName} (optional) --max-attempts={maxAttempts} (optional) --delivery-delay={deliveryDelay} (optional)
+	- mq create-queue --username={myUsername} --password={myPassword} --region={region} --organization-id={bgId} --environment-id={envId} name={myQueueName} --fifo={fifo} (optional) --lock-ttl={lockTtl} (optional) --ttl={ttl} (optional) --encrypted={encrypted} (optional) --dead-letter-queue={dlqQueueName} (optional) 
+	- mq update-queue --username={myUsername} --password={myPassword} --region={region} --organization-id={bgId} --environment-id={envId} name={myQueueName} --fifo={fifo} (optional) --lock-ttl={lockTtl} (optional) --ttl={ttl} (optional) --encrypted={encrypted} (optional) --dead-letter-queue={dlqQueueName} (optional) --max-attempts={maxAttempts} (optional) --delivery-delay={deliveryDelay} (optional)
 	- mq create-exchange --username={myUsername} --password={myPassword} --region={region} --organization-id={bgId} --environment-id={envId} name={myExchangeName} --encrypted={encrypted} (optional)
+	- mq update-exchange --username={myUsername} --password={myPassword} --region={region} --organization-id={bgId} --environment-id={envId} name={myExchangeName} --encrypted={encrypted} (optional)
 	- mq bind-queue --username={myUsername} --password={myPassword} --region={region} --organization-id={bgId} --environment-id={envId} --exchange-name={myQueueName} --queue-name={myQueueName}
 	- mq unbind-queue --exchange-name={myQueueName} --queue-name={myQueueName}
 	- mq delete-queue --username={myUsername} --password={myPassword} --region={region} --organization-id={bgId} --environment-id={envId} name={myQueueName}
