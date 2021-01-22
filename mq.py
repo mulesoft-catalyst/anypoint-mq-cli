@@ -195,6 +195,61 @@ def createQueue(username, password, region, orgId, envId, name, fifo, ttl, lockT
         "message": name + " was successfully created"
     }))
 
+@cli.command(name="update-queue")
+@click.option('--username', 'username', help='Anypoint username',  envvar='MQ_USERNAME')
+@click.option('--password', 'password', help='Anypoint password', envvar='MQ_PASSWORD', hide_input=True)
+@click.option('--region','-r', help='Anypoint MQ region', envvar='MQ_REGION', type=click.Choice(["us-east-1", "us-west-2", "ca-central-1", "eu-west-1", "eu-west-2", "ap-southeast-1", "ap-southeast-2"], case_sensitive=True))
+@click.option('--organization-id', 'orgId', help='Anypoint organization id (business group id)', envvar='MQ_ORG_ID')
+@click.option('--environment-id', 'envId', help='Anypoint environment id', envvar='MQ_ENV_ID')
+@click.option('--name', 'name', help='Queue name', required=True)
+@click.option('--fifo', 'fifo', help='Specifies if it is a FIFO queue', required=False, default=False, type=bool)
+#@click.option('--exchange', 'exchange', help='Specifies if it is an Exchange queue', required=False, default=False)
+@click.option('--ttl', 'ttl', help='Specifies TTL configuration in ms', required=False, default=120000)
+@click.option('--lock-ttl', 'lockTtl', help='Specifies Lock TTL configuration in ms', required=False, default=10000)
+@click.option('--encrypted', 'encrypted', help='Specifies if queue is encrypted', required=False, default=False)
+@click.option('--dead-letter-queue', 'deadLetterQueue', help='Specifies the name of the DLQ', required=False)
+@click.option('--max-attempts', 'maxAttempts', help='Specifies the max deliveries attempts before DLQ redirection', required=False)
+@click.option('--delivery-delay', 'deliveryDelay', help='Specifies the delivery delay time in ms', required=False)
+def updateQueue(username, password, region, orgId, envId, name, fifo, ttl, lockTtl, encrypted, deadLetterQueue, maxAttempts, deliveryDelay):
+    """This command creates a queue (standard or FIFO) in the given region, org id and environment id """
+
+    #### Anypoint login ####
+    token = login(username, password)
+
+    #### Request destinations PUT to AMQ Rest API ####
+
+    mq_request_url = 'https://anypoint.mulesoft.com/mq/admin/api/v1/organizations/' + \
+        orgId + '/environments/' + envId + '/regions/' + region + '/destinations/queues/' + name
+    headers = {'X-ANYPNT-ENV-ID': envId, 'Authorization': 'bearer ' +
+               token}
+
+    payload = {
+      "defaultTtl" : ttl,
+      "defaultLockTtl" : lockTtl,
+      "encrypted" : encrypted,
+      "fifo" : fifo,
+      "deadLetterQueueId": deadLetterQueue,
+      "maxDeliveries": maxAttempts,
+      "defaultDeliveryDelay": deliveryDelay
+    }
+
+
+    try:
+        response = requests.request(
+        "PATCH", mq_request_url, headers=headers, data=json.dumps(payload))
+        response.raise_for_status()
+    except HTTPError as http_err:
+        raise Exception('HTTP error occurred: ' + str(http_err))
+    except Exception as err:
+        raise Exception('Other error occurred: ' + str(err))
+
+
+    #### Build payload to return ####
+    print(json.dumps({   
+        "success": True,
+        "message": name + " was successfully updated"
+    }))
+
 
 @cli.command(name="create-exchange")
 @click.option('--username', 'username', help='Anypoint username',  envvar='MQ_USERNAME')
@@ -235,6 +290,47 @@ def createExchange(username, password, region, orgId, envId, name, encrypted):
     print(json.dumps({   
         "success": True,
         "message": name + " was successfully created"
+    }))
+
+@cli.command(name="update-exchange")
+@click.option('--username', 'username', help='Anypoint username',  envvar='MQ_USERNAME')
+@click.option('--password', 'password', help='Anypoint password', envvar='MQ_PASSWORD', hide_input=True)
+@click.option('--region','-r', help='Anypoint MQ region', envvar='MQ_REGION', type=click.Choice(["us-east-1", "us-west-2", "ca-central-1", "eu-west-1", "eu-west-2", "ap-southeast-1", "ap-southeast-2"], case_sensitive=True))
+@click.option('--organization-id', 'orgId', help='Anypoint organization id (business group id)', envvar='MQ_ORG_ID')
+@click.option('--environment-id', 'envId', help='Anypoint environment id', envvar='MQ_ENV_ID')
+@click.option('--name', 'name', help='Exchange name', required=True)
+@click.option('--encrypted', 'encrypted', help='Specifies if queue is encrypted', required=False, default=False)
+def updateExchange(username, password, region, orgId, envId, name, encrypted):
+    """This command creates an exchange in the given region, org id and environment id  """
+
+    #### Anypoint login ####
+    token = login(username, password)
+
+    #### Request destinations PUT to AMQ Rest API ####
+
+    mq_request_url = 'https://anypoint.mulesoft.com/mq/admin/api/v1/organizations/' + \
+        orgId + '/environments/' + envId + '/regions/' + region + '/destinations/exchanges/' + name
+    headers = {'X-ANYPNT-ENV-ID': envId, 'Authorization': 'bearer ' +
+               token}
+
+    payload = {
+      "encrypted" : encrypted
+    }
+
+    try:
+        response = requests.request(
+        "PATCH", mq_request_url, headers=headers, data=json.dumps(payload))
+        response.raise_for_status()
+    except HTTPError as http_err:
+        raise Exception('HTTP error occurred: ' + str(http_err))
+    except Exception as err:
+        raise Exception('Other error occurred: ' + str(err))
+
+
+    #### Build payload to return ####
+    print(json.dumps({   
+        "success": True,
+        "message": name + " was successfully updated"
     }))
 
 @cli.command(name="bind-queue")
