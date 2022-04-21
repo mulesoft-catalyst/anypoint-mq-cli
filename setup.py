@@ -6,7 +6,7 @@ setup(
     py_modules=['mq'],
     include_package_data=True,
     install_requires=[
-        'Click', 'Requests', 'jsonlib', 'pymemcache', 'python-memcached'
+        'Click', 'Requests', 'jsonlib-python3', 'pymemcache', 'python-memcached'
     ],
     entry_points='''
         [console_scripts]
