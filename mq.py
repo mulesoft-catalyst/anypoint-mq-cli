@@ -159,9 +159,10 @@ def findExchange(username, password, region, orgId, envId, name):
 @click.option('--delivery-delay', 'deliveryDelay', help='Specifies the delivery delay time in ms', required=False)
 def createQueue(username, password, region, orgId, envId, name, fifo, ttl, lockTtl, encrypted, deadLetterQueue, maxAttempts, deliveryDelay):
     """This command creates a queue (standard or FIFO) in the given region, org id and environment id """
-
+    #### Anypoint login ####
+    token = login(username, password)
 ### Updated by Geovani to invoke Util function instead to implement it here ####
-    createQueue_util(username, password, region, orgId, envId, name, fifo, ttl, lockTtl, encrypted, deadLetterQueue, maxAttempts, deliveryDelay)    
+    createQueue_util(token, region, orgId, envId, name, fifo, ttl, lockTtl, encrypted, deadLetterQueue, maxAttempts, deliveryDelay)    
 
     
 @cli.command(name="update-queue")
@@ -230,9 +231,10 @@ def updateQueue(username, password, region, orgId, envId, name, fifo, ttl, lockT
 @click.option('--encrypted', 'encrypted', help='Specifies if queue is encrypted', required=False, default=False)
 def createExchange(username, password, region, orgId, envId, name, encrypted):
     """This command creates an exchange in the given region, org id and environment id  """
-
+    #### Anypoint login ####
+    token = login(username, password)
 ### Updated by Geovani to invoke Util function instead to implement it here ####
-    createExchange_util(username, password, region, orgId, envId, name, encrypted)
+    createExchange_util(token, region, orgId, envId, name, encrypted)
  
 
 @cli.command(name="update-exchange")
@@ -286,9 +288,10 @@ def updateExchange(username, password, region, orgId, envId, name, encrypted):
 @click.option('--queue-name', 'queueName', help='Queue to bind to exchange. Comma-separated value', required=True)
 def bindQueues(username, password, region, orgId, envId, name, queueName):
     """This command creates an exchange in the given region, org id and environment id  """
-
+    #### Anypoint login ####
+    token = login(username, password)
 ### Updated by Geovani to invoke Util function instead to implement it here ####
-    bindQueues_util(username, password, region, orgId, envId, name, queueName)
+    bindQueues_util(token, region, orgId, envId, name, queueName)
 
 
 @cli.command(name="unbind-queue")
@@ -532,6 +535,8 @@ def export(username, password, region, orgId, envId):
 def importConf(username, password, region, orgId, envId, confPath):
     """This search and return queues, exchanges, fifo queues and bindings corresponding to the given region, org id and environment id and exports them to a json file"""
 
+    #### Anypoint login ####
+    token = login(username, password)
 
 #### FIRST WE GENERATE THE DLQs, AS THOSE NEED TO EXIST BEFORE ASSIGNATION TO REGULAR QUEUES AS DLQs
     print("Importing DLQs")
@@ -552,7 +557,7 @@ def importConf(username, password, region, orgId, envId, confPath):
                     else:
                         maxdeliv = item['maxDeliveries']
 
-                    result = createQueue_util(username, password, region, orgId, envId, item['queueId'], item['fifo'], item['defaultTtl'], item['defaultLockTtl'],  item['encrypted'], deadLetterQueueId , maxdeliv , item['defaultDeliveryDelay'])
+                    result = createQueue_util(token, region, orgId, envId, item['queueId'], item['fifo'], item['defaultTtl'], item['defaultLockTtl'],  item['encrypted'], deadLetterQueueId , maxdeliv , item['defaultDeliveryDelay'])
 
 
 #### THEN WE DEFINE REGULAR QUEUES
@@ -571,7 +576,7 @@ def importConf(username, password, region, orgId, envId, confPath):
                         maxdeliv = 10
                     else:
                         maxdeliv = item['maxDeliveries']
-                    result = createQueue_util(username, password, region, orgId, envId, item['queueId'], item['fifo'], item['defaultTtl'], item['defaultLockTtl'],  item['encrypted'], deadLetterQueueId , maxdeliv , item['defaultDeliveryDelay'])
+                    result = createQueue_util(token, region, orgId, envId, item['queueId'], item['fifo'], item['defaultTtl'], item['defaultLockTtl'],  item['encrypted'], deadLetterQueueId , maxdeliv , item['defaultDeliveryDelay'])
 
 
 #### THEN WE DEFINE EXCHANGES
@@ -583,7 +588,7 @@ def importConf(username, password, region, orgId, envId, confPath):
                 with open(confPath + "/" + file) as json_file:
                     item = json.load(json_file)
                     print(item)
-                    result = createExchange_util(username, password, region, orgId, envId, item['exchangeId'], item['encrypted'])
+                    result = createExchange_util(token, region, orgId, envId, item['exchangeId'], item['encrypted'])
 
 #### THEN WE DEFINE THE BINDINGS
     print("Importing Bindings")
@@ -594,7 +599,7 @@ def importConf(username, password, region, orgId, envId, confPath):
                 with open(confPath + "/" + file) as json_file:
                     bindings_array = json.load(json_file)
                     for item in bindings_array:
-                        result = bindQueues_util(username, password, region, orgId, envId, item['exchangeId'],  item['queueId'])
+                        result = bindQueues_util(token, region, orgId, envId, item['exchangeId'],  item['queueId'])
 
     print("Import Done")
     
@@ -634,11 +639,9 @@ def login(username, password):
 
 #### Added by Geovani Osuna to reuse previously implemented functions - Util commands - bindQueues_util, createQueue_util and createExchange_util BEGIN ####
 
-def bindQueues_util(username, password, region, orgId, envId, name, queueName):
-    """This command creates an exchange in the given region, org id and environment id  """
+def bindQueues_util(token, region, orgId, envId, name, queueName):
+    """This function creates an exchange in the given region, org id and environment id  """
 
-    #### Anypoint login ####
-    token = login(username, password)
     #### Request destinations PUT to AMQ Rest API ####
 
     mq_request_url = 'https://anypoint.mulesoft.com/mq/admin/api/v1/organizations/' + \
@@ -664,18 +667,14 @@ def bindQueues_util(username, password, region, orgId, envId, name, queueName):
         "message": queueName + " was successfully binded to " + name
     })) 
 
-def createQueue_util(username, password, region, orgId, envId, name, fifo=False, ttl=120000, lockTtl=10000, encrypted=False, deadLetterQueue=False, maxAttempts=False, deliveryDelay=False):
-    """This command creates a queue (standard or FIFO) in the given region, org id and environment id """
+def createQueue_util(token, region, orgId, envId, name, fifo=False, ttl=120000, lockTtl=10000, encrypted=False, deadLetterQueue=False, maxAttempts=False, deliveryDelay=False):
+    """This function creates a queue (standard or FIFO) in the given region, org id and environment id """
 
-    #### Anypoint login ####
-    token = login(username, password)
     #### Request destinations PUT to AMQ Rest API ####
-
     mq_request_url = 'https://anypoint.mulesoft.com/mq/admin/api/v1/organizations/' + \
         orgId + '/environments/' + envId + '/regions/' + region + '/destinations/queues/' + name
     headers = {'X-ANYPNT-ENV-ID': envId, 'Authorization': 'bearer ' +
                token}
-
 
     if ((deadLetterQueue != '') and (maxAttempts != '')) and ((deadLetterQueue != None) and (maxAttempts != None)):
         payload = {
@@ -713,11 +712,8 @@ def createQueue_util(username, password, region, orgId, envId, name, fifo=False,
     }))
 
 
-def createExchange_util(username, password, region, orgId, envId, name, encrypted):
-    """This command creates an exchange in the given region, org id and environment id  """
-
-    #### Anypoint login ####
-    token = login(username, password)
+def createExchange_util(token, region, orgId, envId, name, encrypted):
+    """This function creates an exchange in the given region, org id and environment id  """
 
     #### Request destinations PUT to AMQ Rest API ####
 
