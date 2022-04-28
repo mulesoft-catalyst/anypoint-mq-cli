@@ -35,7 +35,7 @@
 	- mq delete-queue --username={myUsername} --password={myPassword} --region={region} --organization-id={bgId} --environment-id={envId} name={myQueueName}
 	- mq delete-exchange --username={myUsername} --password={myPassword} --region={region} --organization-id={bgId} --environment-id={envId} name={myExchangeName}
 	- mq purge --username={myUsername} --password={myPassword} --region={region} --organization-id={bgId} --environment-id={envId} name={myQueueName}
-	- mq export --username={myUsername} --password={myPassword} --region={region} --organization-id={bgId} --environment-id={envId}
+	- mq export --username={myUsername} --password={myPassword} --region={region} --organization-id={bgId} --environment-id={envId} --conf-path={confPath}
 	- mq import --username={myUsername} --password={myPassword} --region={region} --organization-id={bgId} --environment-id={envId} --conf-path={confPath}
 - Deactivate the virtual environment: `deactivate`
 
