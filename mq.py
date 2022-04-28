@@ -453,7 +453,9 @@ def purge(username, password, region, orgId, envId, name):
 @click.option('--region','-r', help='Anypoint MQ region', envvar='MQ_REGION', type=click.Choice(["us-east-1", "us-west-2", "ca-central-1", "eu-west-1", "eu-west-2", "ap-southeast-1", "ap-southeast-2"], case_sensitive=True))
 @click.option('--organization-id', 'orgId', help='Anypoint organization id (business group id)', envvar='MQ_ORG_ID')
 @click.option('--environment-id', 'envId', help='Anypoint environment id', envvar='MQ_ENV_ID')
-def export(username, password, region, orgId, envId):
+@click.option('--conf-path', 'confPath', help='Path where conf files will be generated', envvar='CONF_PATH',  required=False)
+
+def export(username, password, region, orgId, envId, confPath):
     """This search and return queues, exchanges, fifo queues and bindings corresponding to the given region, org id and environment id and exports them to a json file"""
 
     #### Anypoint login ####
@@ -482,7 +484,15 @@ def export(username, password, region, orgId, envId):
 
     timestamp = time.strftime("%Y-%m-%d_%H%M%S")
 
-    os.mkdir(timestamp)
+    if (confPath != '') and (confPath != None):
+        dir = confPath
+    else:
+        dir = timestamp
+    
+    print("path:" + dir)
+
+    if not os.path.exists(dir):
+        os.mkdir(dir)
 
     #### Build payload to return ####
     queues = []
@@ -490,15 +500,15 @@ def export(username, password, region, orgId, envId):
        if(value.get('type') == 'queue' ):
             print("Queue extracted: " + value.get('queueId') )
             if(str(value.get('deadLetterSources')) == 'None'):
-                with open(timestamp + '/queue_' + value.get('queueId') + '.json', 'w') as outfile:
+                with open(dir + '/queue_' + value.get('queueId') + '.json', 'w') as outfile:
                     outfile.write(json.dumps(value))
             else:
-                with open(timestamp + '/queue-dlq_' + value.get('queueId') + '.json', 'w') as outfile:
+                with open(dir + '/queue-dlq_' + value.get('queueId') + '.json', 'w') as outfile:
                     outfile.write(json.dumps(value))              
        else:
             exchangeId = value.get('exchangeId')
             print("Exchange with bindings extracted: " + exchangeId)
-            with open(timestamp + '/exchange_' + exchangeId + '.json', 'w') as outfile:
+            with open(dir + '/exchange_' + exchangeId + '.json', 'w') as outfile:
                 outfile.write(json.dumps(value))
             
             bindings_request_url = 'https://anypoint.mulesoft.com/mq/admin/api/v1/organizations/' + \
@@ -518,10 +528,10 @@ def export(username, password, region, orgId, envId):
 
             json_string = json.dumps(bindings.json())   
 
-            with open(timestamp + '/bindings_' + exchangeId + '.json', 'w') as outfile:
+            with open(dir + '/bindings_' + exchangeId + '.json', 'w') as outfile:
                 outfile.write(json_string)
 
-    print("Output path: " + os.path.abspath(os.getcwd()) + '/' + timestamp)            
+    print("Output path: " + os.path.abspath(os.getcwd()) + '/' + dir)            
     print("Export Done")
 
 
