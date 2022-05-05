@@ -161,7 +161,7 @@ def createQueue(username, password, region, orgId, envId, name, fifo, ttl, lockT
     """This command creates a queue (standard or FIFO) in the given region, org id and environment id """
     #### Anypoint login ####
     token = login(username, password)
-### Updated by Geovani to invoke Util function instead to implement it here ####
+
     createQueue_util(token, region, orgId, envId, name, fifo, ttl, lockTtl, encrypted, deadLetterQueue, maxAttempts, deliveryDelay)    
 
     
@@ -233,7 +233,7 @@ def createExchange(username, password, region, orgId, envId, name, encrypted):
     """This command creates an exchange in the given region, org id and environment id  """
     #### Anypoint login ####
     token = login(username, password)
-### Updated by Geovani to invoke Util function instead to implement it here ####
+
     createExchange_util(token, region, orgId, envId, name, encrypted)
  
 
@@ -290,7 +290,7 @@ def bindQueues(username, password, region, orgId, envId, name, queueName):
     """This command creates an exchange in the given region, org id and environment id  """
     #### Anypoint login ####
     token = login(username, password)
-### Updated by Geovani to invoke Util function instead to implement it here ####
+
     bindQueues_util(token, region, orgId, envId, name, queueName)
 
 
@@ -444,8 +444,6 @@ def purge(username, password, region, orgId, envId, name):
         "message": name + " was successfully purged"
     }))
 
-
-#### Added by Geovani Osuna - export and import commands BEGIN ####
 
 @cli.command()
 @click.option('--username', 'username', help='Anypoint username',  envvar='MQ_USERNAME')
@@ -613,8 +611,6 @@ def importConf(username, password, region, orgId, envId, confPath):
 
     print("Import Done")
     
-
-#### Added by Geovani Osuna - export and import commands END ####
 
 ###### COMMANDS #####
 
